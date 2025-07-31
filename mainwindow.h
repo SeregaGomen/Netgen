@@ -18,7 +18,7 @@ class QTimer;
 namespace netgen {
 class Mesh;
 class NetgenGeometry;
-};
+}; // namespace netgen
 
 const int maxRecentFiles = 5;
 
@@ -45,6 +45,7 @@ public slots:
     void slotExportMesh();
     void slotRefineUniform();
     void slotImageSetup();
+    void slotMeshInfo();
     // void slotRefineSecondOrder();
     // void slotRefineHighOrder();
     // void slotRefineBisection();
@@ -53,8 +54,7 @@ private slots:
     void slotOpenRecentFile();
 
 protected:
-    void closeEvent(QCloseEvent*);
-
+    void closeEvent(QCloseEvent *);
 
 private:
     ModelType modelType{ModelType::csg};
@@ -68,7 +68,7 @@ private:
 
     Ui::MainWindow *ui{nullptr};
     QStringList recentFiles;
-    QAction* recentFileActs[maxRecentFiles];
+    QAction *recentFileActs[maxRecentFiles];
     QProgressBar *pb{nullptr};
     QTimer *timer{nullptr};
 
@@ -88,11 +88,11 @@ private:
     void writeSettings();
     void createRecentMenu();
     void setupRecentActions();
-    void updateRecentFileActions(const QString&);
-    void loadFile(const QString&);
-    bool loadCSG(const QString&);
-    bool loadSTL(const QString&);
-    bool loadVOL(const QString&);
-    void exportFile(const QString&);
-    bool exportMesh(const QString&);
+    void updateRecentFileActions(const QString &);
+    void loadFile(const QString &);
+    bool loadCSG(const QString &);
+    bool loadSTL(const QString &);
+    bool loadVOL(const QString &);
+    void exportFile(const QString &);
+    bool exportMesh(const QString &);
 };

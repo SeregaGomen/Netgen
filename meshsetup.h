@@ -14,7 +14,7 @@ public slots:
     void accept(void);
 
 public:
-    explicit MeshingSetupDialog(QWidget* = 0);
+    explicit MeshingSetupDialog(QWidget * = 0);
     ~MeshingSetupDialog();
     void setData();
 
@@ -32,4 +32,3 @@ private:
     Ui::MeshingSetupDialog *ui;
     bool checkValues(void);
 };
-

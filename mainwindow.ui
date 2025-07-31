@@ -34,8 +34,8 @@
       <string>&amp;Recent Files</string>
      </property>
     </widget>
-    <addaction name="actionOpen"/>
-    <addaction name="actionClose"/>
+    <addaction name="actionFileOpen"/>
+    <addaction name="actionFileClose"/>
     <addaction name="actionSaveMesh"/>
     <addaction name="separator"/>
     <addaction name="actionExportMesh"/>
@@ -59,6 +59,8 @@
     <addaction name="actionStopMeshing"/>
     <addaction name="separator"/>
     <addaction name="actionRefineUniform"/>
+    <addaction name="separator"/>
+    <addaction name="actionMeshInfo"/>
     <addaction name="separator"/>
     <addaction name="actionMeshingOptions"/>
    </widget>
@@ -89,7 +91,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpen"/>
+   <addaction name="actionFileOpen"/>
    <addaction name="actionSaveMesh"/>
    <addaction name="separator"/>
    <addaction name="actionViewTerminal"/>
@@ -101,7 +103,7 @@
    <addaction name="separator"/>
    <addaction name="actionImageSetup"/>
   </widget>
-  <action name="actionOpen">
+  <action name="actionFileOpen">
    <property name="icon">
     <iconset resource="Netgen.qrc">
      <normaloff>:/images/open.png</normaloff>:/images/open.png</iconset>
@@ -157,7 +159,7 @@
      <normaloff>:/images/start.png</normaloff>:/images/start.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Generate Mesh</string>
+    <string>&amp;Generate</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+G, Ctrl+M</string>
@@ -194,7 +196,7 @@
     <string>Export Mesh file to different formats</string>
    </property>
   </action>
-  <action name="actionClose">
+  <action name="actionFileClose">
    <property name="text">
     <string>&amp;Close</string>
    </property>
@@ -291,6 +293,14 @@
     <string>Setting up model image parameters</string>
    </property>
   </action>
+  <action name="actionMeshInfo">
+   <property name="text">
+    <string>&amp;Info...</string>
+   </property>
+   <property name="statusTip">
+    <string>Current Mesh Info</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="Netgen.qrc"/>
@@ -313,7 +323,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionOpen</sender>
+   <sender>actionFileOpen</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>slotOpen()</slot>
@@ -425,7 +435,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionClose</sender>
+   <sender>actionFileClose</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>slotClose()</slot>
@@ -536,6 +546,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionMeshInfo</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>slotMeshInfo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>291</x>
+     <y>168</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slotOpen()</slot>
@@ -555,5 +581,6 @@
   <slot>slotRefineHighOrder()</slot>
   <slot>slotRefineBisection()</slot>
   <slot>slotImageSetup()</slot>
+  <slot>slotMeshInfo()</slot>
  </slots>
 </ui>

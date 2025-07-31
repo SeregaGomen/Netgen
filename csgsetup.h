@@ -14,7 +14,7 @@ public slots:
     void accept(void);
 
 public:
-    explicit CSGSetupDialog(double*, double*, double*, double*, QWidget* = 0);
+    explicit CSGSetupDialog(double *, double *, double *, double *, QWidget * = 0);
     ~CSGSetupDialog();
     void setData();
 
@@ -26,5 +26,3 @@ private:
     Ui::CSGSetupDialog *ui;
     bool checkValues(void);
 };
-
-

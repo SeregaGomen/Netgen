@@ -1,6 +1,6 @@
+#include "meshsetup.h"
 #include <QMessageBox>
 #include "stlgeom.hpp"
-#include "meshsetup.h"
 #include "ui_meshsetup.h"
 
 using namespace netgen;
@@ -17,9 +17,15 @@ MeshingSetupDialog::MeshingSetupDialog(QWidget *parent)
     connect(ui->hsLineLength, SIGNAL(valueChanged(int)), this, SLOT(changeLineLength(int)));
 
     connect(ui->hsCloseEdges, SIGNAL(valueChanged(int)), this, SLOT(changeCloseEdges(int)));
-    connect(ui->hsSurfaceCurvature, SIGNAL(valueChanged(int)), this, SLOT(changeSurfaceCurvature(int)));
+    connect(ui->hsSurfaceCurvature,
+            SIGNAL(valueChanged(int)),
+            this,
+            SLOT(changeSurfaceCurvature(int)));
     connect(ui->hsEdgeAngle, SIGNAL(valueChanged(int)), this, SLOT(changeEdgeAngle(int)));
-    connect(ui->hsSurfaceMeshCurv, SIGNAL(valueChanged(int)), this, SLOT(changeSurfaceMeshCurv(int)));
+    connect(ui->hsSurfaceMeshCurv,
+            SIGNAL(valueChanged(int)),
+            this,
+            SLOT(changeSurfaceMeshCurv(int)));
     setData();
     ui->buttonBox->setFocus();
 }
@@ -74,15 +80,15 @@ void MeshingSetupDialog::setData()
     ui->leMin->setText(QString("%1").arg(mparam.minh));
     ui->leMax->setText(QString("%1").arg(mparam.maxh));
     ui->leGrading->setText(QString("%1").arg(mparam.grading));
-    ui->hsRadius->setValue(int(mparam.curvaturesafety*5));
-    ui->hsEdge->setValue(int(mparam.segmentsperedge*5));
+    ui->hsRadius->setValue(int(mparam.curvaturesafety * 5));
+    ui->hsEdge->setValue(int(mparam.segmentsperedge * 5));
 
-    ui->hsChartDist->setValue(int(stlparam.resthchartdistfac*5));
-    ui->hsLineLength->setValue(int(stlparam.resthlinelengthfac*5));
-    ui->hsCloseEdges->setValue(int(stlparam.resthcloseedgefac*5));
-    ui->hsSurfaceCurvature->setValue(int(stlparam.resthsurfcurvfac*5));
-    ui->hsEdgeAngle->setValue(int(stlparam.yangle*5));
-    ui->hsSurfaceMeshCurv->setValue(int(stlparam.resthsurfmeshcurvfac*5));
+    ui->hsChartDist->setValue(int(stlparam.resthchartdistfac * 5));
+    ui->hsLineLength->setValue(int(stlparam.resthlinelengthfac * 5));
+    ui->hsCloseEdges->setValue(int(stlparam.resthcloseedgefac * 5));
+    ui->hsSurfaceCurvature->setValue(int(stlparam.resthsurfcurvfac * 5));
+    ui->hsEdgeAngle->setValue(int(stlparam.yangle * 5));
+    ui->hsSurfaceMeshCurv->setValue(int(stlparam.resthsurfmeshcurvfac * 5));
 }
 
 bool MeshingSetupDialog::checkValues(void)
@@ -108,20 +114,18 @@ bool MeshingSetupDialog::checkValues(void)
 
 void MeshingSetupDialog::accept(void)
 {
-    if (checkValues())
-    {
+    if (checkValues()) {
         mparam.minh = ui->leMin->text().toDouble();
         mparam.maxh = ui->leMax->text().toDouble();
         mparam.grading = ui->leGrading->text().toDouble();
-        mparam.curvaturesafety = double(ui->hsRadius->value())*0.2;
-        mparam.segmentsperedge = double(ui->hsEdge->value())*0.2;
-        stlparam.resthchartdistfac = double(ui->hsChartDist->value())*0.2;
-        stlparam.resthlinelengthfac = double(ui->hsCloseEdges->value())*0.2;
-        stlparam.resthsurfcurvfac = double(ui->hsSurfaceCurvature->value())*0.2;
-        stlparam.yangle = double(ui->hsEdgeAngle->value())*0.2;
-        stlparam.resthsurfmeshcurvfac = double(ui->hsSurfaceMeshCurv->value())*0.2;
+        mparam.curvaturesafety = double(ui->hsRadius->value()) * 0.2;
+        mparam.segmentsperedge = double(ui->hsEdge->value()) * 0.2;
+        stlparam.resthchartdistfac = double(ui->hsChartDist->value()) * 0.2;
+        stlparam.resthlinelengthfac = double(ui->hsCloseEdges->value()) * 0.2;
+        stlparam.resthsurfcurvfac = double(ui->hsSurfaceCurvature->value()) * 0.2;
+        stlparam.yangle = double(ui->hsEdgeAngle->value()) * 0.2;
+        stlparam.resthsurfmeshcurvfac = double(ui->hsSurfaceMeshCurv->value()) * 0.2;
         QDialog::accept();
-    }
-    else
+    } else
         QMessageBox::information(this, tr("Error"), tr("Error floating value"));
 }

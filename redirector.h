@@ -1,30 +1,29 @@
 #pragma once
 
 #pragma once
-#include <QPlainTextEdit>
-#include <QString>
 #include <QMetaObject>
-#include <QTextCharFormat>
+#include <QPlainTextEdit>
 #include <QScrollBar>
-#include <streambuf>
+#include <QString>
+#include <QTextCharFormat>
 #include <iostream>
+#include <streambuf>
 
 class StreamRedirector : public std::streambuf
 {
 public:
     StreamRedirector(QPlainTextEdit *textEdit, std::ostream &stream, const QColor &color = Qt::black)
-        : m_textEdit(textEdit), m_stream(stream), m_color(color)
+        : m_textEdit(textEdit)
+        , m_stream(stream)
+        , m_color(color)
     {
         m_oldBuf = stream.rdbuf(this);
     }
 
-    ~StreamRedirector()
-    {
-        m_stream.rdbuf(m_oldBuf);
-    }
+    ~StreamRedirector() { m_stream.rdbuf(m_oldBuf); }
 
 protected:
-    std::streamsize xsputn(const char* s, std::streamsize n) override
+    std::streamsize xsputn(const char *s, std::streamsize n) override
     {
         QString text = QString::fromLocal8Bit(s, static_cast<int>(n));
         appendToTextEdit(text);
@@ -33,8 +32,7 @@ protected:
 
     int overflow(int c) override
     {
-        if (c != EOF)
-        {
+        if (c != EOF) {
             char ch = static_cast<char>(c);
             appendToTextEdit(QString(ch));
         }
@@ -42,23 +40,27 @@ protected:
     }
 
 private:
-    void appendToTextEdit(const QString& text)
+    void appendToTextEdit(const QString &text)
     {
-        if (!m_textEdit) return;
+        if (!m_textEdit)
+            return;
 
-        QMetaObject::invokeMethod(m_textEdit, [=]() {
-            QTextCursor cursor = m_textEdit->textCursor();
-            cursor.movePosition(QTextCursor::End);
+        QMetaObject::invokeMethod(
+            m_textEdit,
+            [=]() {
+                QTextCursor cursor = m_textEdit->textCursor();
+                cursor.movePosition(QTextCursor::End);
 
-            QTextCharFormat format;
-            format.setForeground(m_color);
-            cursor.setCharFormat(format);
+                QTextCharFormat format;
+                format.setForeground(m_color);
+                cursor.setCharFormat(format);
 
-            cursor.insertText(text);
-            m_textEdit->setTextCursor(cursor); // Прокрутка вниз
-            m_textEdit->ensureCursorVisible();
-            //m_textEdit->verticalScrollBar()->setValue(m_textEdit->verticalScrollBar()->maximum());
-        }, Qt::QueuedConnection);
+                cursor.insertText(text);
+                m_textEdit->setTextCursor(cursor); // Прокрутка вниз
+                m_textEdit->ensureCursorVisible();
+                //m_textEdit->verticalScrollBar()->setValue(m_textEdit->verticalScrollBar()->maximum());
+            },
+            Qt::QueuedConnection);
 
         // m_textEdit->verticalScrollBar()->setValue(m_textEdit->verticalScrollBar()->maximum());
         //m_textEdit->moveCursor(QTextCursor::End);

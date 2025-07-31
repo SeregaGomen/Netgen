@@ -64,6 +64,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         redirector.h
         Netgen.qrc
         imagesetup.h imagesetup.cpp imagesetup.ui
+        meshinfo.h meshinfo.cpp meshinfo.ui
 
     )
 # Define target properties for Android with Qt 6 as:

@@ -1,10 +1,15 @@
-#include <QMessageBox>
 #include "csgsetup.h"
+#include <QMessageBox>
 #include "ui_csgsetup.h"
 
-CSGSetupDialog::CSGSetupDialog(double *minX, double *maxX, double *facets, double *detail, QWidget *parent)
+CSGSetupDialog::CSGSetupDialog(
+    double *minX, double *maxX, double *facets, double *detail, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CSGSetupDialog), minX(minX), maxX(maxX), facets(facets), detail(detail)
+    , ui(new Ui::CSGSetupDialog)
+    , minX(minX)
+    , maxX(maxX)
+    , facets(facets)
+    , detail(detail)
 {
     ui->setupUi(this);
     setData();
@@ -77,8 +82,7 @@ bool CSGSetupDialog::checkValues(void)
 
 void CSGSetupDialog::accept(void)
 {
-    if (checkValues())
-    {
+    if (checkValues()) {
         *facets = ui->leFacets->text().toDouble();
         *detail = ui->leDetail->text().toDouble();
         minX[0] = ui->leMinX->text().toDouble();
@@ -88,7 +92,6 @@ void CSGSetupDialog::accept(void)
         minX[2] = ui->leMinZ->text().toDouble();
         maxX[2] = ui->leMaxZ->text().toDouble();
         QDialog::accept();
-    }
-    else
+    } else
         QMessageBox::information(this, tr("Error"), tr("Error floating value"));
 }

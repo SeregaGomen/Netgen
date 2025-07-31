@@ -1,24 +1,25 @@
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSettings>
 #include <QCloseEvent>
-#include <QFileInfo>
-#include <QProgressBar>
 #include <QDockWidget>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
 #include <QPlainTextEdit>
+#include <QProgressBar>
+#include <QSettings>
 #include <QTimer>
 
+#include "./ui_mainwindow.h"
+#include "csgsetup.h"
+#include "csgview.h"
+#include "imagesetup.h"
+#include "mainwindow.h"
+#include "meshsetup.h"
+#include "meshview.h"
 #include "ng.h"
 #include "redirector.h"
-#include "mainwindow.h"
-#include "threads.h"
-#include "csgview.h"
 #include "stlview.h"
-#include "meshview.h"
-#include "csgsetup.h"
-#include "meshsetup.h"
-#include "imagesetup.h"
-#include "./ui_mainwindow.h"
+#include "threads.h"
+#include "meshinfo.h"
 
 using namespace netgen;
 
@@ -31,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Для предотвращение кратковременного исчезновения окна при первом отображении изображения
     setCentralWidget(new CSGView(nullptr, this));
 
-
     setupRecentActions();
     readSettings();
     createRecentMenu();
@@ -43,7 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     timer = new QTimer(this);
     pb->setTextVisible(true);
-    connect(timer, &QTimer::timeout, this, [=]() { pb->setValue(multithread.percent); pb->setFormat(multithread.task); });
+    connect(timer, &QTimer::timeout, this, [=]() {
+        pb->setValue(multithread.percent);
+        pb->setFormat(multithread.task);
+    });
 
     terminal = new QPlainTextEdit(this);
     //terminal->setTextColor(QColor( "black" ));
@@ -51,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent)
     terminal->setReadOnly(true);
     terminal->setWordWrapMode(QTextOption::NoWrap);
     terminal->setFont(QFont("Courier"));
-
 
     //////////////////////
     dock = new QDockWidget(tr("Terminal"), this);
@@ -72,7 +74,6 @@ MainWindow::MainWindow(QWidget *parent)
     // connect(ui->menu_Geometry, &QMenu::aboutToShow, this, checkMenu);
     // connect(ui->menu_Mesh, &QMenu::aboutToShow, this, checkMenu);
     checkMenuState();
-
 }
 
 MainWindow::~MainWindow()
@@ -80,16 +81,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::slotOpen(void)
 {
-    bool rotating = static_cast<CSGView*>(centralWidget()) ? static_cast<CSGView*>(centralWidget())->getRotating() : false;
+    bool rotating = static_cast<CSGView *>(centralWidget())
+    ? static_cast<CSGView *>(centralWidget())->getRotating()
+    : false;
 
     if (rotating)
-        static_cast<CSGView*>(centralWidget())->setRotating(false);
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open"), "", tr("All Geometry Types (*.geo *.stl ...);; Geometry file (*.geo);; STL Geometry (*.stl);; Binary STL Geometry (*.stlb);; Mesh file (*.vol *vol.gz)"));
+        static_cast<CSGView *>(centralWidget())->setRotating(false);
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Open"),
+        "",
+        tr("All Geometry Types (*.geo *.stl ...);; Geometry file (*.geo);; STL Geometry (*.stl);; "
+           "Binary STL Geometry (*.stlb);; Mesh file (*.vol *vol.gz)"));
     if (rotating)
-        static_cast<CSGView*>(centralWidget())->setRotating(true);
+        static_cast<CSGView *>(centralWidget())->setRotating(true);
 
     if (fileName.length())
         loadFile(fileName);
@@ -106,17 +113,15 @@ void MainWindow::loadFile(const QString &fileName)
         ok = loadCSG(fileName);
     else if (QFileInfo(fileName).suffix().toUpper() == "STL")
         ok = loadSTL(fileName);
-    else if (QFileInfo(fileName).suffix().toUpper() == "VOL" || QFileInfo(fileName).completeSuffix().toUpper() == "VOL.GZ")
+    else if (QFileInfo(fileName).suffix().toUpper() == "VOL"
+             || QFileInfo(fileName).completeSuffix().toUpper() == "VOL.GZ")
         ok = loadVOL(fileName);
     stopProgress();
 
-    if (ok)
-    {
+    if (ok) {
         statusBar()->showMessage(tr("File successfully downloaded"), 5000);
         updateRecentFileActions(fileName);
-    }
-    else
-    {
+    } else {
         statusBar()->showMessage(tr("Error opening file"), 5000);
         QMessageBox(QMessageBox::Critical, tr("Error"), tr("Error loading file")).exec();
     }
@@ -126,8 +131,7 @@ void MainWindow::loadFile(const QString &fileName)
 bool MainWindow::loadCSG(const QString &fileName)
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    if (!::loadCSG(fileName.toStdString(), geometry, minX, maxX, detail, facets))
-    {
+    if (!::loadCSG(fileName.toStdString(), geometry, minX, maxX, detail, facets)) {
         QApplication::restoreOverrideCursor();
         statusBar()->showMessage(tr("Error reading in current CSG data"), 5000);
         return false;
@@ -136,7 +140,7 @@ bool MainWindow::loadCSG(const QString &fileName)
     statusBar()->showMessage(tr("Successfully loaded CSG data"), 5000);
     modelType = ModelType::csg;
     mesh = nullptr;
-    setCentralWidget(new CSGView(static_cast<CSGeometry*>(geometry.get()), this));
+    setCentralWidget(new CSGView(static_cast<CSGeometry *>(geometry.get()), this));
     setWindowTitle(QFileInfo(fileName).fileName() + " - Netgen");
     return true;
 }
@@ -144,8 +148,7 @@ bool MainWindow::loadCSG(const QString &fileName)
 bool MainWindow::loadSTL(const QString &fileName)
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    if (!::loadSTL(fileName.toStdString(), geometry))
-    {
+    if (!::loadSTL(fileName.toStdString(), geometry)) {
         QApplication::restoreOverrideCursor();
         statusBar()->showMessage(tr("Error reading in current STL data"), 5000);
         return false;
@@ -154,7 +157,7 @@ bool MainWindow::loadSTL(const QString &fileName)
     statusBar()->showMessage(tr("Successfully loaded STL data"), 5000);
     modelType = ModelType::stl;
     mesh = nullptr;
-    setCentralWidget(new STLView(static_cast<STLGeometry*>(geometry.get()), this));
+    setCentralWidget(new STLView(static_cast<STLGeometry *>(geometry.get()), this));
     setWindowTitle(QFileInfo(fileName).fileName() + " - Netgen");
     return true;
 }
@@ -162,8 +165,7 @@ bool MainWindow::loadSTL(const QString &fileName)
 bool MainWindow::loadVOL(const QString &fileName)
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    if (!::loadMesh(fileName.toStdString(), mesh))
-    {
+    if (!::loadMesh(fileName.toStdString(), mesh)) {
         QApplication::restoreOverrideCursor();
         statusBar()->showMessage(tr("Error reading in current VOL-file"), 5000);
         return false;
@@ -188,8 +190,7 @@ void MainWindow::readSettings()
     recentFiles = settings.value("recentFileList").toStringList();
     if (Qt::WindowStates(states) == Qt::WindowMaximized)
         this->setWindowState(Qt::WindowMaximized);
-    else
-    {
+    else {
         move(pos);
         resize(size);
     }
@@ -209,8 +210,7 @@ void MainWindow::writeSettings()
 
 void MainWindow::setupRecentActions()
 {
-    for (int i = 0; i < maxRecentFiles; ++i)
-    {
+    for (int i = 0; i < maxRecentFiles; ++i) {
         recentFileActs[i] = new QAction(this);
         recentFileActs[i]->setVisible(false);
         connect(recentFileActs[i], SIGNAL(triggered()), this, SLOT(slotOpenRecentFile()));
@@ -241,8 +241,7 @@ void MainWindow::updateRecentFileActions(const QString &fileName)
 void MainWindow::createRecentMenu()
 {
     // Создаем в меню новый список Recent-файлов
-    for (int i = 0; i < recentFiles.size(); ++i)
-    {
+    for (int i = 0; i < recentFiles.size(); ++i) {
         QString text = QString("&%1 %2").arg(i + 1).arg(QFileInfo(recentFiles[i]).fileName());
 
         recentFileActs[i]->setText(text);
@@ -268,7 +267,6 @@ void MainWindow::slotGenerateMesh()
         mesh = make_shared<Mesh>();
     unique_ptr<NgThread> thread = make_unique<NgThread>(mesh, geometry);
 
-
     isGenMeshStarted = true;
     isGenMeshCanceled = false;
 
@@ -283,9 +281,7 @@ void MainWindow::slotGenerateMesh()
     stopProgress();
     isGenMeshStarted = false;
 
-
-    if (!thread->isGenerated())
-    {
+    if (!thread->isGenerated()) {
         if (isGenMeshCanceled)
             statusBar()->showMessage(tr("Process aborted by user!"), 5000);
         checkMenuState();
@@ -293,19 +289,23 @@ void MainWindow::slotGenerateMesh()
     }
 
     // Визуализация
-    if (dynamic_cast<MeshView*>(centralWidget()) != nullptr)
-        dynamic_cast<MeshView*>(centralWidget())->refresh(mesh.get());
+    if (dynamic_cast<MeshView *>(centralWidget()) != nullptr)
+        dynamic_cast<MeshView *>(centralWidget())->refresh(mesh.get());
     else
         setCentralWidget(new MeshView(mesh.get(), this));
-
 
     //setCentralWidget(new MeshView(mesh.get(), this));
 
     checkMenuState();
     cout << endl;
+
+    statusBar()->showMessage(
+        tr("Points: %1\t\t Elements: %2\t\t Surf Elements: %3")
+            .arg(mesh->GetNP())
+            .arg(mesh->GetNE())
+            .arg(mesh->GetNSE()), 5000);
+
 }
-
-
 
 void MainWindow::slotStopMeshing()
 {
@@ -332,17 +332,22 @@ void MainWindow::slotMeshingOptions()
 
 void MainWindow::slotSave()
 {
-    bool rotating = static_cast<CSGView*>(centralWidget()) ? static_cast<CSGView*>(centralWidget())->getRotating() : false;
+    bool rotating = static_cast<CSGView *>(centralWidget())
+    ? static_cast<CSGView *>(centralWidget())->getRotating()
+    : false;
 
     if (rotating)
-        static_cast<CSGView*>(centralWidget())->setRotating(false);
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save"), "", tr("Mesh file (*.vol *vol.gz)"));
+        static_cast<CSGView *>(centralWidget())->setRotating(false);
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save"),
+                                                    "",
+                                                    tr("Mesh file (*.vol *vol.gz)"));
     if (rotating)
-        static_cast<CSGView*>(centralWidget())->setRotating(true);
+        static_cast<CSGView *>(centralWidget())->setRotating(true);
 
-    if (fileName.length())
-    {
-        if (!fileName.endsWith(".vol.gz", Qt::CaseInsensitive) && !fileName.endsWith(".vol", Qt::CaseInsensitive))
+    if (fileName.length()) {
+        if (!fileName.endsWith(".vol.gz", Qt::CaseInsensitive)
+            && !fileName.endsWith(".vol", Qt::CaseInsensitive))
             fileName += ".vol.gz";
         mesh->Save(fileName.toStdString());
     }
@@ -351,21 +356,26 @@ void MainWindow::slotSave()
 void MainWindow::checkMenuState()
 {
     // File
-    ui->actionOpen->setEnabled(!isGenMeshStarted);
-    ui->actionClose->setEnabled(geometry != nullptr || mesh != nullptr);
+    ui->actionFileOpen->setEnabled(!isGenMeshStarted);
+    ui->actionFileClose->setEnabled(geometry != nullptr || mesh != nullptr);
     ui->actionSaveMesh->setEnabled(mesh != nullptr && !isGenMeshStarted);
     ui->actionExportMesh->setEnabled(mesh != nullptr);
     ui->menuRecentFiles->setEnabled(!isGenMeshStarted);
 
     // Geometry
-    ui->actionScanCSGGeometry->setEnabled((geometry != nullptr && modelType == ModelType::csg) && !isGenMeshStarted);
-    ui->actionCSGOption->setEnabled((geometry != nullptr && modelType == ModelType::csg) && !isGenMeshStarted);
+    ui->actionScanCSGGeometry->setEnabled((geometry != nullptr && modelType == ModelType::csg)
+                                          && !isGenMeshStarted);
+    ui->actionCSGOption->setEnabled((geometry != nullptr && modelType == ModelType::csg)
+                                    && !isGenMeshStarted);
 
     // Mesh
-    ui->actionStartMeshing->setEnabled((geometry != nullptr || mesh != nullptr) && !isGenMeshStarted);
+    ui->actionStartMeshing->setEnabled((geometry != nullptr || mesh != nullptr)
+                                       && !isGenMeshStarted);
     ui->actionStopMeshing->setEnabled(isGenMeshStarted);
     ui->actionRefineUniform->setEnabled(geometry != nullptr && mesh != nullptr);
-    ui->actionMeshingOptions->setEnabled((mesh != nullptr || geometry != nullptr) && !isGenMeshStarted);
+    ui->actionMeshInfo->setEnabled(mesh != nullptr && !isGenMeshStarted);
+    ui->actionMeshingOptions->setEnabled((mesh != nullptr || geometry != nullptr)
+                                         && !isGenMeshStarted);
 
     // View
     ui->actionViewGeometry->setEnabled(geometry != nullptr);
@@ -377,7 +387,6 @@ void MainWindow::checkMenuState()
     // ui->actionRefineSecondOrder->setEnabled(isMeshCreated);
     // ui->actionRefineHighOrder->setEnabled(isMeshCreated);
     // ui->actionRefineOptions->setEnabled(mesh != nullptr);
-
 }
 
 void MainWindow::slotScanCSG()
@@ -401,13 +410,15 @@ void MainWindow::slotClose()
 
 void MainWindow::slotViewGeometry()
 {
-    if (dynamic_cast<MeshView*>(centralWidget()) != nullptr)
-        setCentralWidget(modelType == ModelType::stl ? new STLView(static_cast<STLGeometry*>(geometry.get()), this) : new CSGView(static_cast<CSGeometry*>(geometry.get()), this));
+    if (dynamic_cast<MeshView *>(centralWidget()) != nullptr)
+        setCentralWidget(modelType == ModelType::stl
+                             ? new STLView(static_cast<STLGeometry *>(geometry.get()), this)
+                             : new CSGView(static_cast<CSGeometry *>(geometry.get()), this));
 }
 
 void MainWindow::slotViewMesh()
 {
-    if (dynamic_cast<MeshView*>(centralWidget()) == nullptr)
+    if (dynamic_cast<MeshView *>(centralWidget()) == nullptr)
         setCentralWidget(new MeshView(mesh.get(), this));
 }
 
@@ -419,16 +430,21 @@ void MainWindow::slotViewTerminal()
 void MainWindow::slotExportMesh()
 {
     QString selectedFilter;
-    bool rotating = static_cast<CSGView*>(centralWidget()) ? static_cast<CSGView*>(centralWidget())->getRotating() : false;
+    bool rotating = static_cast<CSGView *>(centralWidget())
+                        ? static_cast<CSGView *>(centralWidget())->getRotating()
+                        : false;
 
     if (rotating)
-        static_cast<CSGView*>(centralWidget())->setRotating(false);
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Export"), "", tr("QFEM Mesh file (*.mesh)"), &selectedFilter);
+        static_cast<CSGView *>(centralWidget())->setRotating(false);
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Export"),
+                                                    "",
+                                                    tr("QFEM Mesh file (*.mesh)"),
+                                                    &selectedFilter);
     if (rotating)
-        static_cast<CSGView*>(centralWidget())->setRotating(true);
+        static_cast<CSGView *>(centralWidget())->setRotating(true);
 
-    if (fileName.length())
-    {
+    if (fileName.length()) {
         QString extension;
 
         if (selectedFilter.contains("*.mesh"))
@@ -449,13 +465,10 @@ void MainWindow::exportFile(const QString &fileName)
     if (QFileInfo(fileName).suffix().toUpper() == "MESH")
         ok = exportMesh(fileName);
 
-    if (ok)
-    {
+    if (ok) {
         statusBar()->showMessage(tr("File successfully exported"), 5000);
         //updateRecentFileActions(fileName);
-    }
-    else
-    {
+    } else {
         statusBar()->showMessage(tr("Error exported file"), 5000);
         QMessageBox(QMessageBox::Critical, tr("Error"), tr("Error exported file")).exec();
     }
@@ -474,11 +487,10 @@ bool MainWindow::exportMesh(const QString &fileName)
 
     out << mesh->GetNP() << '\n';
     for (PointIndex pi = PointIndex::BASE; pi < mesh->GetNP() + PointIndex::BASE; pi++)
-        out << (*mesh)[pi](0) << ' ' << (*mesh)[pi](1) << ' '<< (*mesh)[pi](2) << "\n";
+        out << (*mesh)[pi](0) << ' ' << (*mesh)[pi](1) << ' ' << (*mesh)[pi](2) << "\n";
 
     out << mesh->GetNE() << '\n';
-    for (ElementIndex ei = 0; ei < mesh->GetNE(); ei++)
-    {
+    for (ElementIndex ei = 0; ei < mesh->GetNE(); ei++) {
         Element el = (*mesh)[ei];
 
         for (auto j = 0; j < el.GetNP(); j++)
@@ -487,8 +499,7 @@ bool MainWindow::exportMesh(const QString &fileName)
 
     out << mesh->GetNSE() << '\n';
 
-    for (SurfaceElementIndex sei = 0; sei < mesh->GetNSE(); sei++)
-    {
+    for (SurfaceElementIndex sei = 0; sei < mesh->GetNSE(); sei++) {
         Element2d sel = (*mesh)[sei];
 
         for (auto j = 0; j < sel.GetNP(); j++)
@@ -502,8 +513,8 @@ void MainWindow::slotRefineUniform()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     refinementMesh(geometry, mesh);
-    if (dynamic_cast<MeshView*>(centralWidget()) != nullptr)
-        dynamic_cast<MeshView*>(centralWidget())->refresh(mesh.get());
+    if (dynamic_cast<MeshView *>(centralWidget()) != nullptr)
+        dynamic_cast<MeshView *>(centralWidget())->refresh(mesh.get());
     else
         setCentralWidget(new MeshView(mesh.get(), this));
     QApplication::restoreOverrideCursor();
@@ -563,5 +574,13 @@ void MainWindow::stopProgress()
 
 void MainWindow::slotImageSetup()
 {
-    ImageSetup(static_cast<CSGView*>(centralWidget())->getParams(), static_cast<CSGView*>(centralWidget()), this).exec();
+    ImageSetup(static_cast<CSGView *>(centralWidget())->getParams(),
+               static_cast<CSGView *>(centralWidget()),
+               this)
+        .exec();
+}
+
+void MainWindow::slotMeshInfo()
+{
+    (new MeshInfo(mesh->GetNP(), mesh->GetNE(), mesh->GetNSE(), this))->exec();
 }

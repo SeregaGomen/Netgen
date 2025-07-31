@@ -1,22 +1,19 @@
-#include "csg.hpp"
-#include "stlgeom.hpp"
 #include "threads.h"
+#include "csg.hpp"
 #include "ng.h"
+#include "stlgeom.hpp"
 
 using namespace netgen;
 
 // Запуск построения сетки
 void NgThread::run(void)
 {
-    try
-    {
+    try {
         if (geometry == nullptr)
             generated = !generateVolumeMesh(mesh) ? true : false;
         else
             generated = !generateMesh(geometry, mesh) ? true : false;
-    }
-    catch (...)
-    {
+    } catch (...) {
         cerr << "Meshing error!" << endl;
         return;
     }
@@ -24,4 +21,3 @@ void NgThread::run(void)
     cout << "Points:   " << mesh->GetNP() << endl;
     cout << "Elements: " << mesh->GetNE() << endl;
 }
-

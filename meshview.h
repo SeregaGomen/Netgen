@@ -14,7 +14,8 @@ protected:
     void calcRadius() override;
 
 public:
-    MeshView(void *geometry, QWidget *parent) : CSGView(geometry, parent) {}
+    MeshView(void *geometry, QWidget *parent)
+        : CSGView(geometry, parent)
+    {}
     ~MeshView() = default;
 };
-

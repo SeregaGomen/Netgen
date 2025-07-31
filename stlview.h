@@ -9,6 +9,8 @@ protected:
     void calcRadius() override;
 
 public:
-    STLView(void *geometry, QWidget *parent) : CSGView(geometry, parent) {}
+    STLView(void *geometry, QWidget *parent)
+        : CSGView(geometry, parent)
+    {}
     ~STLView() = default;
 };

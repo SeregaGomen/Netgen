@@ -6,7 +6,7 @@ class CSGView;
 struct ImageParams;
 
 namespace Ui {
-    class ImageSetup;
+class ImageSetup;
 }
 
 using namespace std;
@@ -21,7 +21,7 @@ public slots:
     void accept(void);
 
 public:
-    explicit ImageSetup(ImageParams*, CSGView*, QWidget * = nullptr);
+    explicit ImageSetup(ImageParams *, CSGView *, QWidget * = nullptr);
     ~ImageSetup();
 
 private slots:
@@ -45,11 +45,9 @@ signals:
     void sendShowMesh();
     void sendShowSurfaceAndMesh();
 
-
 private:
     Ui::ImageSetup *ui;
     ImageParams *params = nullptr;
-    CSGView* view = nullptr;
+    CSGView *view = nullptr;
     void setup();
-
 };
